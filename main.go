@@ -1,7 +1,8 @@
 package main
 
 import (
-	// "flag"
+	"bufio"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -58,12 +59,54 @@ func replyChatID(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	}
 }
 
+// Create a message handler to write content of stdout (each line) to someone
+func messageWriter(bot *tgbotapi.BotAPI, chatID int64) {
+	var msgTxt string
+	var msg tgbotapi.MessageConfig
+	scanner := bufio.NewScanner(os.Stdin)
+	log.Printf("Scannig…")
+	for scanner.Scan() {
+		msgTxt = scanner.Text()
+		log.Printf("Scanned '%s'", msgTxt)
+		msg = tgbotapi.NewMessage(chatID, msgTxt)
+
+		_, err := bot.Send(msg)
+		if err != nil {
+			log.Printf("Error sending message from stdin: '%s'", err)
+		}
+	}
+	if err := scanner.Err(); err != nil {
+		fmt.Fprintln(os.Stderr, "reading standard input:", err)
+	}
+
+	return
+}
+
 func main() {
 	bot := login(os.Getenv("TLGCLI_TOKEN"))
-
-	bot.Debug = true
-
+	bot.Debug = false
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	updateLoop(bot, replyChatID)
+	chatID := flag.NewFlagSet("chatid", flag.ExitOnError)
+
+	write := flag.NewFlagSet("write", flag.ExitOnError)
+	var id int64
+	write.Int64Var(&id, "to", -1, "Id of the chat to write to")
+
+	if len(os.Args) < 2 {
+		fmt.Println("TODO Write doc")
+		os.Exit(2)
+	}
+	var h handler = nil
+	switch os.Args[1] {
+	case "chatid":
+		chatID.Parse(os.Args[2:])
+		h = replyChatID
+	case "write":
+		write.Parse(os.Args[2:])
+		messageWriter(bot, id)
+	}
+	if h != nil {
+		updateLoop(bot, h)
+	}
 }
