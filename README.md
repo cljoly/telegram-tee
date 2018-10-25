@@ -1,4 +1,4 @@
-# telegram-cli-bot
+# telegram-tee
 Simple cli tool to send stdin to any Telegram chat, through a bot. It’s a bit like `tee`.
 
 ## Getting started
