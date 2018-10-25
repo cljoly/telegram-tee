@@ -99,7 +99,12 @@ func messageWriter(bot *tgbotapi.BotAPI, chatIDs []int) {
 }
 
 func main() {
-	bot := login(os.Getenv("TLGCLI_TOKEN"))
+	token := os.Getenv("TLGCLI_TOKEN")
+	if token == "" {
+		fmt.Println("You need to set TLGCLI_TOKEN in your env")
+		return
+	}
+	bot := login(token)
 	bot.Debug = false
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
