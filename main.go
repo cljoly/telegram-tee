@@ -2,10 +2,10 @@ package main
 
 import (
 	"bufio"
-	"flag"
 	"fmt"
 	"log"
 	"os"
+	"strconv"
 
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -38,7 +38,22 @@ func updateLoop(bot *tgbotapi.BotAPI, h handler) {
 	}
 }
 
-// Message handler replying by giving current chat ID
+// Parse chat ID from command line arguments
+func parseChatID(args []string) (chatIDs []int, err error) {
+	chatIDs = make([]int, len(args))
+	err = nil
+	var id int
+	for i := 0; i < len(args); i++ {
+		id, err = strconv.Atoi(args[i])
+		chatIDs[i] = id
+		if err != nil {
+			return
+		}
+	}
+	return
+}
+
+// Message handler replying by giving a set of chat ID
 func replyChatID(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 	if update.Message == nil { // ignore any non-Message Updates
 		return
@@ -60,7 +75,7 @@ func replyChatID(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 }
 
 // Create a message handler to write content of stdout (each line) to someone
-func messageWriter(bot *tgbotapi.BotAPI, chatID int64) {
+func messageWriter(bot *tgbotapi.BotAPI, chatIDs []int) {
 	var msgTxt string
 	var msg tgbotapi.MessageConfig
 	scanner := bufio.NewScanner(os.Stdin)
@@ -68,11 +83,13 @@ func messageWriter(bot *tgbotapi.BotAPI, chatID int64) {
 	for scanner.Scan() {
 		msgTxt = scanner.Text()
 		log.Printf("Scanned '%s'", msgTxt)
-		msg = tgbotapi.NewMessage(chatID, msgTxt)
+		for chatID := range chatIDs {
+			msg = tgbotapi.NewMessage(int64(chatID), msgTxt)
 
-		_, err := bot.Send(msg)
-		if err != nil {
-			log.Printf("Error sending message from stdin: '%s'", err)
+			_, err := bot.Send(msg)
+			if err != nil {
+				log.Printf("Error sending message from stdin: '%s'", err)
+			}
 		}
 	}
 	if err := scanner.Err(); err != nil {
@@ -87,26 +104,12 @@ func main() {
 	bot.Debug = false
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
-	chatID := flag.NewFlagSet("chatid", flag.ExitOnError)
-
-	write := flag.NewFlagSet("write", flag.ExitOnError)
-	var id int64
-	write.Int64Var(&id, "to", -1, "Id of the chat to write to")
+	go updateLoop(bot, replyChatID)
 
 	if len(os.Args) < 2 {
-		fmt.Println("TODO Write doc")
-		os.Exit(2)
-	}
-	var h handler = nil
-	switch os.Args[1] {
-	case "chatid":
-		chatID.Parse(os.Args[2:])
-		h = replyChatID
-	case "write":
-		write.Parse(os.Args[2:])
-		messageWriter(bot, id)
-	}
-	if h != nil {
-		updateLoop(bot, h)
+		fmt.Println("I’m listening, I will answer to everyone with the chatID of our chat. You can then make me write the content of stdin to a chat, by giving me its chatID as argument.")
+	} else {
+		ids, _ := parseChatID(os.Args[2:])
+		messageWriter(bot, ids)
 	}
 }
