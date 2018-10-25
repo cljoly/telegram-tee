@@ -6,7 +6,7 @@ Simple cli tool to send stdin to any Telegram chat, through a bot. It’s a bit 
 ### Set up
 
 First, install the tool with
-```
+``` bash
 go get -u github.com/leowzukw/telegram-tee
 ```
 
@@ -16,14 +16,14 @@ the token of the bot that will write stdin to a chat for you. You may want to [c
 ### Use
 
 Then, you need to get the chat ID of the conversation to which you want to send stdin. Just run
-```
+``` bash
 telegram-tee
 ```
 and write with Telegram to your bot. It will reply with the current chatID.
 
 You can then do
-```
-telegram-tee <chatID>
+``` bash
+echo Hi | telegram-tee <chatID>
 ```
 
 You can even send to several chatID at the same time.
