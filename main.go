@@ -83,12 +83,11 @@ func messageWriter(bot *tgbotapi.BotAPI, chatIDs []int) {
 	for scanner.Scan() {
 		msgTxt = scanner.Text()
 		log.Printf("Scanned '%s'", msgTxt)
-		for chatID := range chatIDs {
+		for _, chatID := range chatIDs {
 			msg = tgbotapi.NewMessage(int64(chatID), msgTxt)
-
 			_, err := bot.Send(msg)
 			if err != nil {
-				log.Printf("Error sending message from stdin: '%s'", err)
+				log.Printf("Error sending message to %d from stdin: '%s'", chatID, err)
 			}
 		}
 	}
@@ -109,7 +108,7 @@ func main() {
 	if len(os.Args) < 2 {
 		fmt.Println("I’m listening, I will answer to everyone with the chatID of our chat. You can then make me write the content of stdin to a chat, by giving me its chatID as argument.")
 	} else {
-		ids, _ := parseChatID(os.Args[2:])
+		ids, _ := parseChatID(os.Args[1:])
 		messageWriter(bot, ids)
 	}
 }
