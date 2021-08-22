@@ -1,5 +1,16 @@
-# telegram-tee
-Simple cli tool to send stdin to any Telegram chat, through a bot. It’s a bit like `tee`.
+<!-- insert
+---
+title: Telegram Tee
+date: 2021-08-21T16:23:33
+gometa: "joly.pw/into-ledger git https://github.com/cljoly/into-ledger"
+---
+{{< github_badge >}}
+end_insert -->
+<!-- remove -->
+# Telegram Tee
+<!-- end_remove -->
+
+Simple cli tool to send stdin to any Telegram chat, through a bot. It’s a bit like `tee`, but for telegram.
 
 ## Getting started
 
@@ -7,7 +18,7 @@ Simple cli tool to send stdin to any Telegram chat, through a bot. It’s a bit 
 
 First, install the tool with
 ``` bash
-go get -u github.com/leowzukw/telegram-tee
+go get -u cj.rs/telegram-tee
 ```
 
 Then, you need to control a bot. Set the environment variable `TLGCLI_TOKEN` to
