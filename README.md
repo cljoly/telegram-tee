@@ -2,7 +2,7 @@
 ---
 title: Telegram Tee
 date: 2021-08-21T16:23:33
-gometa: "joly.pw/into-ledger git https://github.com/cljoly/into-ledger"
+gometa: "cj.rs/telegram-tee git https://github.com/cljoly/telegram-tee"
 ---
 {{< github_badge >}}
 end_insert -->
