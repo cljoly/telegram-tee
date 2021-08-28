@@ -3,6 +3,7 @@
 title: Telegram Tee
 date: 2021-08-21T16:23:33
 gometa: "cj.rs/telegram-tee git https://github.com/cljoly/telegram-tee"
+description: "💬 Simple cli tool to create telegram bot behaving like tee"
 ---
 {{< github_badge >}}
 end_insert -->
