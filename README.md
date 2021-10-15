@@ -19,7 +19,7 @@ Simple cli tool to send stdin to any Telegram chat, through a bot. It’s a bit 
 
 First, install the tool with
 ``` bash
-go get -u cj.rs/telegram-tee
+go install cj.rs/telegram-tee@latest
 ```
 
 Then, you need to control a bot. Set the environment variable `TLGCLI_TOKEN` to
