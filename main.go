@@ -85,6 +85,10 @@ func messageWriter(bot *tgbotapi.BotAPI, chatIDs []int) {
 	for scanner.Scan() {
 		msgTxt = scanner.Text()
 		fmt.Fprintf(os.Stderr, "Scanned '%s'", msgTxt)
+
+		// Tee feature
+		fmt.Println(msgTxt)
+
 		for _, chatID := range chatIDs {
 			msg = tgbotapi.NewMessage(int64(chatID), msgTxt)
 			_, err := bot.Send(msg)
@@ -108,7 +112,7 @@ func main() {
 	}
 	bot := login(token)
 	bot.Debug = false
-	fmt.Fprintf(os.Stderr, "Authorized on account %s", bot.Self.UserName)
+	fmt.Fprintf(os.Stderr, "Authorized on account %s\n", bot.Self.UserName)
 
 	go updateLoop(bot, replyChatID)
 
