@@ -3,18 +3,18 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 
-	"github.com/go-telegram-bot-api/telegram-bot-api"
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
 // Create a bot with token
 func login(token string) (bot *tgbotapi.BotAPI) {
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
-		log.Panic(err)
+		fmt.Fprintln(os.Stderr, err)
+		panic("login error")
 	}
 	return
 }
@@ -30,7 +30,8 @@ func updateLoop(bot *tgbotapi.BotAPI, h handler) {
 	updates, err := bot.GetUpdatesChan(u)
 
 	if err != nil {
-		log.Panic("Error getting updates")
+		fmt.Fprintln(os.Stderr, err)
+		panic("Error getting updates")
 	}
 
 	for update := range updates {
@@ -61,7 +62,7 @@ func replyChatID(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 	chatID := update.Message.Chat.ID
 
-	log.Printf("[%s(%s)] %s", update.Message.From.UserName, chatID, update.Message.Text)
+	fmt.Fprintf(os.Stderr, "[%s(%s)] %s", update.Message.From.UserName, chatID, update.Message.Text)
 
 	msgText := fmt.Sprint("chatID: ", chatID)
 
@@ -70,7 +71,8 @@ func replyChatID(bot *tgbotapi.BotAPI, update tgbotapi.Update) {
 
 	_, err := bot.Send(msg)
 	if err != nil {
-		log.Panic("Error sending message: ", msgText)
+		fmt.Fprintln(os.Stderr, "Error sending message: ", msgText)
+		panic("error replying")
 	}
 }
 
@@ -79,15 +81,15 @@ func messageWriter(bot *tgbotapi.BotAPI, chatIDs []int) {
 	var msgTxt string
 	var msg tgbotapi.MessageConfig
 	scanner := bufio.NewScanner(os.Stdin)
-	log.Printf("Scannig…")
+	fmt.Fprintf(os.Stderr, "Scannig…")
 	for scanner.Scan() {
 		msgTxt = scanner.Text()
-		log.Printf("Scanned '%s'", msgTxt)
+		fmt.Fprintf(os.Stderr, "Scanned '%s'", msgTxt)
 		for _, chatID := range chatIDs {
 			msg = tgbotapi.NewMessage(int64(chatID), msgTxt)
 			_, err := bot.Send(msg)
 			if err != nil {
-				log.Printf("Error sending message to %d from stdin: '%s'", chatID, err)
+				fmt.Fprintf(os.Stderr, "Error sending message to %d from stdin: '%s'", chatID, err)
 			}
 		}
 	}
@@ -101,17 +103,17 @@ func messageWriter(bot *tgbotapi.BotAPI, chatIDs []int) {
 func main() {
 	token := os.Getenv("TLGCLI_TOKEN")
 	if token == "" {
-		fmt.Println("You need to set TLGCLI_TOKEN in your env")
+		fmt.Fprintln(os.Stderr, "You need to set TLGCLI_TOKEN in your env")
 		return
 	}
 	bot := login(token)
 	bot.Debug = false
-	log.Printf("Authorized on account %s", bot.Self.UserName)
+	fmt.Fprintf(os.Stderr, "Authorized on account %s", bot.Self.UserName)
 
 	go updateLoop(bot, replyChatID)
 
 	if len(os.Args) < 2 {
-		fmt.Println("I’m listening, I will answer to everyone with the chatID of our chat. You can then make me write the content of stdin to a chat, by giving me its chatID as argument.")
+		fmt.Fprintln(os.Stderr, "I’m listening, I will answer to everyone with the chatID of our chat. You can then make me write the content of stdin to a chat, by giving me its chatID as argument.")
 	} else {
 		ids, _ := parseChatID(os.Args[1:])
 		messageWriter(bot, ids)
